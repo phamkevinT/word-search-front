@@ -12,6 +12,9 @@
     td {
       width: 20px;
       height: 20px;
+      &.selected {
+        color: rgb(233, 159, 0);
+      }
     }
   }
 }

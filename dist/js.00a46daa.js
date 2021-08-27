@@ -960,18 +960,46 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Grid = /*#__PURE__*/function () {
   function Grid() {
     (0, _classCallCheck2.default)(this, Grid);
+    this.wordSelectMode = false;
+    this.selectedItems = [];
+    this.firstSelectedItem;
+    this.gridArea = null;
   }
 
   (0, _createClass2.default)(Grid, [{
+    key: "getCellsInRange",
+    value: function getCellsInRange(firstLetter, currentLetter) {
+      var cellsInRange = [];
+      console.log(firstLetter, currentLetter);
+
+      if (firstLetter.y === currentLetter.y) {
+        if (firstLetter.x > currentLetter.x) {
+          var _ref = [firstLetter, currentLetter];
+          currentLetter = _ref[0];
+          firstLetter = _ref[1];
+        }
+
+        for (var i = firstLetter.x; i <= currentLetter.x; i++) {
+          console.log(this.gridArea.querySelector("td[data-x=\"".concat(i, "\"][data-y=\"").concat(currentLetter.y, "\"]")));
+          cellsInRange.push(this.gridArea.querySelector("td[data-x=\"".concat(i, "\"][data-y=\"").concat(currentLetter.y, "\"]")));
+        }
+      }
+
+      return cellsInRange;
+    }
+  }, {
     key: "renderGrid",
     value: function renderGrid(gridSize, wordgrid) {
+      var _this = this;
+
       // get the reference for the grid-area
       var gridArea = document.getElementsByClassName("grid-area")[0];
 
       if (gridArea.lastChild) {
         gridArea.removeChild(gridArea.lastChild);
-      } // creates a <table> element and a <tbody> element
+      }
 
+      this.gridArea = gridArea; // creates a <table> element and a <tbody> element
 
       var tbl = document.createElement("table");
       var tblBody = document.createElement("tbody");
@@ -986,8 +1014,12 @@ var Grid = /*#__PURE__*/function () {
           // node the contents of the <td>, and put the <td> at
           // the end of the table row
           var cell = document.createElement("td");
-          var cellText = document.createTextNode(wordgrid[index++]);
+          var letter = wordgrid[index++];
+          var cellText = document.createTextNode(letter);
           cell.appendChild(cellText);
+          cell.setAttribute("data-x", i);
+          cell.setAttribute("data-y", j);
+          cell.setAttribute("data-letter", letter);
           row.appendChild(cell);
         } // add the row to the end of the table body
 
@@ -998,7 +1030,54 @@ var Grid = /*#__PURE__*/function () {
 
       tbl.appendChild(tblBody); // appends <table> into <body>
 
-      gridArea.appendChild(tbl);
+      gridArea.appendChild(tbl); // Click Handlers
+
+      gridArea.addEventListener("mousedown", function (event) {
+        _this.wordSelectMode = true;
+        var cell = event.target;
+        var x = +cell.getAttribute("data-x");
+        var y = +cell.getAttribute("data-y");
+        var letter = cell.getAttribute("data-letter");
+        _this.firstSelectedItem = {
+          x: x,
+          y: y
+        };
+      });
+      gridArea.addEventListener("mousemove", function (event) {
+        if (_this.wordSelectMode) {
+          var _cell = event.target; // cell.classList.add("selected");
+
+          var x = +_cell.getAttribute("data-x");
+          var y = +_cell.getAttribute("data-y");
+
+          var _letter = _cell.getAttribute("data-letter"); // if (this.selectedItems.length) {
+          //   const lastSelectedItem =
+          //     this.selectedItems[this.selectedItems.length - 1];
+          //   if (lastSelectedItem.x === x && lastSelectedItem.y === y) return;
+          // }
+          // this.selectedItems.push({
+          //   x,
+          //   y,
+          //   letter,
+          //   cell,
+          // });
+
+
+          _this.getCellsInRange(_this.firstSelectedItem, {
+            x: x,
+            y: y
+          }).forEach(function (cell) {
+            return cell.classList.add("selected");
+          });
+        }
+      });
+      gridArea.addEventListener("mouseup", function (event) {
+        _this.wordSelectMode = false;
+
+        _this.selectedItems.forEach(function (item) {
+          return item.cell.classList.remove("selected");
+        });
+      });
     }
   }]);
   return Grid;

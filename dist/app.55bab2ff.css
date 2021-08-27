@@ -15,5 +15,8 @@
   width: 20px;
   height: 20px;
 }
+.grid-area table td.selected {
+  color: #e99f00;
+}
 
 /*# sourceMappingURL=/app.55bab2ff.css.map */
