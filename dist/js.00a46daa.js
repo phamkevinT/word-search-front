@@ -915,16 +915,112 @@ try {
 
 },{}],"../node_modules/@babel/runtime/regenerator/index.js":[function(require,module,exports) {
 module.exports = require("regenerator-runtime");
-},{"regenerator-runtime":"../node_modules/regenerator-runtime/runtime.js"}],"js/index.js":[function(require,module,exports) {
+},{"regenerator-runtime":"../node_modules/regenerator-runtime/runtime.js"}],"../node_modules/@babel/runtime/helpers/classCallCheck.js":[function(require,module,exports) {
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+module.exports = _classCallCheck;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+},{}],"../node_modules/@babel/runtime/helpers/createClass.js":[function(require,module,exports) {
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+},{}],"js/grid.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Grid = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Grid = /*#__PURE__*/function () {
+  function Grid() {
+    (0, _classCallCheck2.default)(this, Grid);
+  }
+
+  (0, _createClass2.default)(Grid, [{
+    key: "renderGrid",
+    value: function renderGrid(gridSize, wordgrid) {
+      // get the reference for the grid-area
+      var gridArea = document.getElementsByClassName("grid-area")[0];
+
+      if (gridArea.lastChild) {
+        gridArea.removeChild(gridArea.lastChild);
+      } // creates a <table> element and a <tbody> element
+
+
+      var tbl = document.createElement("table");
+      var tblBody = document.createElement("tbody");
+      var index = 0; // creating all cells
+
+      for (var i = 0; i < gridSize; i++) {
+        // creates a table row
+        var row = document.createElement("tr");
+
+        for (var j = 0; j < gridSize; j++) {
+          // Create a <td> element and a text node, make the text
+          // node the contents of the <td>, and put the <td> at
+          // the end of the table row
+          var cell = document.createElement("td");
+          var cellText = document.createTextNode(wordgrid[index++]);
+          cell.appendChild(cellText);
+          row.appendChild(cell);
+        } // add the row to the end of the table body
+
+
+        tblBody.appendChild(row);
+      } // put the <tbody> in the <table>
+
+
+      tbl.appendChild(tblBody); // appends <table> into <body>
+
+      gridArea.appendChild(tbl); // sets the border attribute of tbl to 2;
+
+      tbl.setAttribute("border", "2");
+    }
+  }]);
+  return Grid;
+}();
+
+exports.Grid = Grid;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js"}],"js/index.js":[function(require,module,exports) {
 "use strict";
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _grid = require("./grid");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var GRID_SIZE = 10;
 var submitWordBtn = document.querySelector(".submit-word");
+var grid = new _grid.Grid();
 submitWordBtn.addEventListener("click", /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
   var result;
   return _regenerator.default.wrap(function _callee$(_context) {
@@ -936,9 +1032,10 @@ submitWordBtn.addEventListener("click", /*#__PURE__*/(0, _asyncToGenerator2.defa
 
         case 2:
           result = _context.sent;
+          grid.renderGrid(GRID_SIZE, result);
           console.log(result);
 
-        case 4:
+        case 5:
         case "end":
           return _context.stop();
       }
@@ -959,7 +1056,7 @@ function _fetchGridInfo() {
           case 0:
             commaSeparatedWords = wordList.join(",");
             _context2.next = 3;
-            return fetch("http://localhost:8080/wordgrid?gridSize=20&wordList=".concat(commaSeparatedWords));
+            return fetch("http://localhost:8080/wordgrid?gridSize=".concat(GRID_SIZE, "&wordList=").concat(commaSeparatedWords));
 
           case 3:
             response = _context2.sent;
@@ -979,7 +1076,7 @@ function _fetchGridInfo() {
   }));
   return _fetchGridInfo.apply(this, arguments);
 }
-},{"@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js"}],"C:/Users/Kevin/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","./grid":"js/grid.js"}],"C:/Users/Kevin/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1007,7 +1104,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59527" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51988" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
