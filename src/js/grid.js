@@ -35,7 +35,6 @@ export class Grid {
     tbl.appendChild(tblBody);
     // appends <table> into <body>
     gridArea.appendChild(tbl);
-    // sets the border attribute of tbl to 2;
-    tbl.setAttribute("border", "2");
+
   }
 }

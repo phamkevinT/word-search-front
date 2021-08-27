@@ -998,9 +998,7 @@ var Grid = /*#__PURE__*/function () {
 
       tbl.appendChild(tblBody); // appends <table> into <body>
 
-      gridArea.appendChild(tbl); // sets the border attribute of tbl to 2;
-
-      tbl.setAttribute("border", "2");
+      gridArea.appendChild(tbl);
     }
   }]);
   return Grid;
