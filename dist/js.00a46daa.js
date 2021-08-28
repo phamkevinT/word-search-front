@@ -964,24 +964,34 @@ var Grid = /*#__PURE__*/function () {
     this.selectedItems = [];
     this.firstSelectedItem;
     this.gridArea = null;
+    this.words = [];
+    this.foundWords = [];
   }
 
   (0, _createClass2.default)(Grid, [{
     key: "getCellsInRange",
     value: function getCellsInRange(firstLetter, currentLetter) {
       var cellsInRange = [];
-      console.log(firstLetter, currentLetter);
+
+      if (firstLetter.x > currentLetter.x || firstLetter.y > currentLetter.y) {
+        var _ref = [firstLetter, currentLetter];
+        currentLetter = _ref[0];
+        firstLetter = _ref[1];
+      }
 
       if (firstLetter.y === currentLetter.y) {
-        if (firstLetter.x > currentLetter.x) {
-          var _ref = [firstLetter, currentLetter];
-          currentLetter = _ref[0];
-          firstLetter = _ref[1];
-        }
-
         for (var i = firstLetter.x; i <= currentLetter.x; i++) {
-          console.log(this.gridArea.querySelector("td[data-x=\"".concat(i, "\"][data-y=\"").concat(currentLetter.y, "\"]")));
           cellsInRange.push(this.gridArea.querySelector("td[data-x=\"".concat(i, "\"][data-y=\"").concat(currentLetter.y, "\"]")));
+        }
+      } else if (firstLetter.x === currentLetter.x) {
+        for (var _i = firstLetter.y; _i <= currentLetter.y; _i++) {
+          cellsInRange.push(this.gridArea.querySelector("td[data-x=\"".concat(currentLetter.x, "\"][data-y=\"").concat(_i, "\"]")));
+        }
+      } else if (currentLetter.y - firstLetter.y === currentLetter.x - firstLetter.x) {
+        var delta = currentLetter.y - firstLetter.y;
+
+        for (var _i2 = 0; _i2 <= delta; _i2++) {
+          cellsInRange.push(this.gridArea.querySelector("td[data-x=\"".concat(firstLetter.x + _i2, "\"][data-y=\"").concat(firstLetter.y + _i2, "\"]")));
         }
       }
 
@@ -1032,7 +1042,7 @@ var Grid = /*#__PURE__*/function () {
 
       gridArea.appendChild(tbl); // Click Handlers
 
-      gridArea.addEventListener("mousedown", function (event) {
+      tbl.addEventListener("mousedown", function (event) {
         _this.wordSelectMode = true;
         var cell = event.target;
         var x = +cell.getAttribute("data-x");
@@ -1043,40 +1053,48 @@ var Grid = /*#__PURE__*/function () {
           y: y
         };
       });
-      gridArea.addEventListener("mousemove", function (event) {
+      tbl.addEventListener("mousemove", function (event) {
         if (_this.wordSelectMode) {
-          var _cell = event.target; // cell.classList.add("selected");
-
+          var _cell = event.target;
           var x = +_cell.getAttribute("data-x");
           var y = +_cell.getAttribute("data-y");
 
-          var _letter = _cell.getAttribute("data-letter"); // if (this.selectedItems.length) {
-          //   const lastSelectedItem =
-          //     this.selectedItems[this.selectedItems.length - 1];
-          //   if (lastSelectedItem.x === x && lastSelectedItem.y === y) return;
-          // }
-          // this.selectedItems.push({
-          //   x,
-          //   y,
-          //   letter,
-          //   cell,
-          // });
+          var _letter = _cell.getAttribute("data-letter");
 
+          _this.selectedItems.forEach(function (cell) {
+            return cell.classList.remove("selected");
+          });
 
-          _this.getCellsInRange(_this.firstSelectedItem, {
+          _this.selectedItems = _this.getCellsInRange(_this.firstSelectedItem, {
             x: x,
             y: y
-          }).forEach(function (cell) {
+          });
+
+          _this.selectedItems.forEach(function (cell) {
             return cell.classList.add("selected");
           });
         }
       });
-      gridArea.addEventListener("mouseup", function (event) {
+      tbl.addEventListener("mouseup", function (event) {
         _this.wordSelectMode = false;
 
-        _this.selectedItems.forEach(function (item) {
-          return item.cell.classList.remove("selected");
-        });
+        var selectedWord = _this.selectedItems.reduce(function (word, cell) {
+          return word += cell.getAttribute("data-letter");
+        }, '');
+
+        var reversedSelectedWord = selectedWord.split("").reverse().join("");
+
+        if (_this.words.indexOf(selectedWord) !== -1) {
+          _this.foundWords.push(selectedWord);
+        } else if (_this.words.indexOf(reversedSelectedWord) !== -1) {
+          _this.foundWords.push(reversedSelectedWord);
+        } else {
+          _this.selectedItems.forEach(function (item) {
+            return item.classList.remove("selected");
+          });
+        }
+
+        _this.selectedItems = [];
       });
     }
   }]);
@@ -1095,24 +1113,35 @@ var _grid = require("./grid");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var GRID_SIZE = 10;
 var submitWordBtn = document.querySelector(".submit-word");
 var grid = new _grid.Grid();
 submitWordBtn.addEventListener("click", /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-  var result;
+  var grid, commaSeparatedWords, gridSize, result, wordListNode, wordListSection;
   return _regenerator.default.wrap(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          _context.next = 2;
-          return fetchGridInfo(["ONE", "TWO", "THREE"]);
-
-        case 2:
-          result = _context.sent;
-          grid.renderGrid(GRID_SIZE, result);
-          console.log(result);
+          grid = new _grid.Grid();
+          commaSeparatedWords = document.querySelector("#add-word").value;
+          gridSize = document.querySelector("#grid-size").value;
+          _context.next = 5;
+          return fetchGridInfo(gridSize, commaSeparatedWords);
 
         case 5:
+          result = _context.sent;
+          grid.words = commaSeparatedWords.split(",");
+          grid.renderGrid(gridSize, result);
+          wordListNode = document.createTextNode(grid.words);
+          wordListSection = document.querySelector(".word-list");
+
+          if (wordListSection.lastChild) {
+            wordListSection.removeChild(wordListSection.lastChild);
+          }
+
+          wordListSection.appendChild(wordListNode);
+          console.log(result);
+
+        case 13:
         case "end":
           return _context.stop();
       }
@@ -1120,31 +1149,30 @@ submitWordBtn.addEventListener("click", /*#__PURE__*/(0, _asyncToGenerator2.defa
   }, _callee);
 })));
 
-function fetchGridInfo(_x) {
+function fetchGridInfo(_x, _x2) {
   return _fetchGridInfo.apply(this, arguments);
 }
 
 function _fetchGridInfo() {
-  _fetchGridInfo = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(wordList) {
-    var commaSeparatedWords, response, result;
+  _fetchGridInfo = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(gridSize, commaSeparatedWords) {
+    var response, result;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            commaSeparatedWords = wordList.join(",");
-            _context2.next = 3;
-            return fetch("http://localhost:8080/wordgrid?gridSize=".concat(GRID_SIZE, "&wordList=").concat(commaSeparatedWords));
+            _context2.next = 2;
+            return fetch("http://localhost:8080/wordgrid?gridSize=".concat(gridSize, "&wordList=").concat(commaSeparatedWords));
 
-          case 3:
+          case 2:
             response = _context2.sent;
-            _context2.next = 6;
+            _context2.next = 5;
             return response.text();
 
-          case 6:
+          case 5:
             result = _context2.sent;
             return _context2.abrupt("return", result.split(" "));
 
-          case 8:
+          case 7:
           case "end":
             return _context2.stop();
         }
@@ -1181,7 +1209,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51988" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55081" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

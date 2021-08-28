@@ -1,22 +1,33 @@
 import { Grid } from "./grid";
 
-const GRID_SIZE = 10;
-
 const submitWordBtn = document.querySelector(".submit-word");
 const grid = new Grid;
 
 submitWordBtn.addEventListener("click", async () => {
-  let result = await fetchGridInfo(["ONE", "TWO", "THREE"]);
-  grid.renderGrid(GRID_SIZE, result);
+  const grid = new Grid();
+  const commaSeparatedWords = document.querySelector("#add-word").value;
+  const gridSize = document.querySelector("#grid-size").value;
 
+  let result = await fetchGridInfo(gridSize, commaSeparatedWords);
+
+  grid.words = commaSeparatedWords.split(",");
+  grid.renderGrid(gridSize, result);
+
+  let wordListNode = document.createTextNode(grid.words);
+  let wordListSection = document.querySelector(".word-list");
+
+  if (wordListSection.lastChild) {
+    wordListSection.removeChild(wordListSection.lastChild);
+  }
+
+  wordListSection.appendChild(wordListNode);
   console.log(result);
 });
 
-async function fetchGridInfo(wordList) {
-  const commaSeparatedWords = wordList.join(",");
+async function fetchGridInfo(gridSize, commaSeparatedWords) {
 
   let response = await fetch(
-    `http://localhost:8080/wordgrid?gridSize=${GRID_SIZE}&wordList=${commaSeparatedWords}`
+    `http://localhost:8080/wordgrid?gridSize=${gridSize}&wordList=${commaSeparatedWords}`
   );
   let result = await response.text();
   return result.split(" ");
